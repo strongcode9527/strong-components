@@ -1,0 +1,23 @@
+{
+  "name": "strong-components",
+  "version": "1.0.0",
+  "description": "在工作当中，总是有着新的收获，所以自己写一套感觉比较详细的组件库，宁缺毋滥，算是自己学习的一个总结吧。",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/strongcode9527/strong-components.git"
+  },
+  "keywords": [
+    "react",
+    "component"
+  ],
+  "author": "strong",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/strongcode9527/strong-components/issues"
+  },
+  "homepage": "https://github.com/strongcode9527/strong-components#readme"
+}
