@@ -19,5 +19,9 @@
   "bugs": {
     "url": "https://github.com/strongcode9527/strong-components/issues"
   },
-  "homepage": "https://github.com/strongcode9527/strong-components#readme"
+  "homepage": "https://github.com/strongcode9527/strong-components#readme",
+  "dependencies": {
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6"
+  }
 }
