@@ -147,12 +147,14 @@ export default class Refresh extends Component {
       throw new Error('handleScrollToZero must be a function')
     }
 
-    handleScrollToZero && handleScrollToZero()
+    if (handleScrollToZero) {
+      handleScrollToZero()
+    }
 
-    if(this.realBody.scrollTop > 100) {
-      this.setState({showTop: true})
-    }else {
-      this.setState({showTop: false})
+    if (this.realBody.scrollTop > 100) {
+      this.setState({ showTop: true })
+    } else {
+      this.setState({ showTop: false })
     }
   }
 
@@ -182,37 +184,60 @@ export default class Refresh extends Component {
   }
 
   render() {
-    const {children, loading, prefixCls, isShowGotoTop, GotoTop} = this.props,
-      bodyStyle = {
-        position: 'relative'},
-        moveStyle = {transform: `translate3d(0,${this.state.moveDistance}px,0)`}
+    const { 
+      GotoTop,
+      loading,
+      children, 
+      prefixCls,
+      isShowGotoTop,
+    } = this.props
+
+    const {
+      showTop,
+      isLoading,
+      moveDistance,
+    } = this.state
+
+    const bodyStyle = {
+      position: 'relative',
+    }
+
+    const moveStyle = {
+      transform: `translate3d(0,${moveDistance}px,0)`,
+    }
+
     return (
       <div
-        ref={body => this.body = body}
-        className={classNames(`${prefixCls}-body`,{[`${prefixCls}-refresh-loading`]: this.state.isLoading})}
         style={bodyStyle}
+        ref={body => this.body = body}
+        className={classNames(`${prefixCls}-body`, { [`${prefixCls}-refresh-loading`]: isLoading })}
       >
         <div ref={animation => this.animation = animation} className={`${prefixCls}-ptr-element`} style={moveStyle}>
-          <span className={`${prefixCls}-genericon ${prefixCls}-genericon-next`}/>
-          {loading ||
-          <div className={`${prefixCls}-loading`}>
-            <span className={`${prefixCls}-loading-ptr-1`} />
-            <span className={`${prefixCls}-loading-ptr-2`} />
-            <span className={`${prefixCls}-loading-ptr-3`} />
-          </div>}
+          <span className={`${prefixCls}-genericon ${prefixCls}-genericon-next`} />
+          {
+            loading && (
+              <div className={`${prefixCls}-loading`}>
+                <span className={`${prefixCls}-loading-ptr-1`} />
+                <span className={`${prefixCls}-loading-ptr-2`} />
+                <span className={`${prefixCls}-loading-ptr-3`} />
+              </div>
+            )
+        }
         </div>
         <div
           style={moveStyle}
+          ref={(items) => this.items = items}
           className={`${prefixCls}-refresh-view`}
-          ref={items => this.items = items}
         >
           {children}
         </div>
         <div>
           {
-            isShowGotoTop && this.state.showTop && <div onClick={this.goToTop}>
-              {GotoTop || <div className={`${prefixCls}-goto_top`}  />}
-            </div>
+            isShowGotoTop && showTop && (
+              <div onTouchStart={this.goToTop}>
+                { GotoTop || <div className={`${prefixCls}-goto_top`} /> }
+              </div>
+            )
           }
         </div>
       </div>
@@ -228,6 +253,7 @@ Refresh.propTypes = {
   resistance: PropTypes.number,
   isShowGotoTop: PropTypes.bool,
   operationCallback: PropTypes.func,
+  handleScrollToZero: PropTypes.func,
   defaultScrollTop: PropTypes.number,
   distanceToRefresh: PropTypes.number,
   scrollTargetSelector: PropTypes.string,
@@ -237,9 +263,11 @@ Refresh.defaultProps = {
   isRefresh: true,
   resistance: 2.5,
   defaultScrollTop: 0,
+  onRefresh: () => {},
   isShowGotoTop: true,
   distanceToRefresh: 100,
   prefixCls: 'mi-refresh',
   scrollTargetSelector: '',
-  onRefresh: () => {},
+  operationCallback: () => {},
+  handleScrollToZero: () => {},
 }
