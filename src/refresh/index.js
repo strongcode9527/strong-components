@@ -103,8 +103,9 @@ export default class Refresh extends Component {
     })
     document.addEventListener('touchmove', this.handleCancelMove, this.passiveSupported ? {passive: false} : false)
   }
+
   handleTouchEnd = (event) => {
-    const {distanceToRefresh} = this.props
+    const { distanceToRefresh } = this.props
     if (this.distance > distanceToRefresh && !this.getRealBodyScrollTop() && !this.startScrollTop && !this.isLoading) {
       this.setState({
         isLoading: true,
@@ -112,19 +113,21 @@ export default class Refresh extends Component {
       })
       this.isLoading = true
       this.loading()
-    }else {
+    } else {
       this.setState({
         moveDistance: 0,
       })
     }
     document.removeEventListener('touchmove', this.handleCancelMove)
   }
+
   handleCancelMove = (e) => {
     e.preventDefault()
   }
+
   loading = async () => {
-    const {onRefresh} = this.props
-    await new Promise((resolve, reject) => {onRefresh(resolve, reject)})
+    const { onRefresh } = this.props
+    await new Promise((resolve, reject) => { onRefresh(resolve, reject) })
     this.distance = 0
     this.isLoading = false
     this.setState({
@@ -132,13 +135,15 @@ export default class Refresh extends Component {
       isLoading: false,
     })
   }
+
   goToTop = () => {
     this.realBody.scrollTop = 0
   }
-  handleScroll = () => {
-    const {handleScrollToZero} = this.props
 
-    if(handleScrollToZero && typeof handleScrollToZero !== 'function') {
+  handleScroll = () => {
+    const { handleScrollToZero } = this.props
+
+    if (handleScrollToZero && typeof handleScrollToZero !== 'function') {
       throw new Error('handleScrollToZero must be a function')
     }
 
@@ -150,11 +155,13 @@ export default class Refresh extends Component {
       this.setState({showTop: false})
     }
   }
+
   /**
    * 类似于jquery的元素选择器，
    *  target 为空返回document
    * @param {String} target
    */
+
   getScrollTarget = (target) => {
     return !target
       ? this.body
@@ -164,13 +171,16 @@ export default class Refresh extends Component {
       ? document.body
       : document.querySelector(target) || document
   }
+
   /**
    * 返回指定dom的滚动条高度
    */
+
   getRealBodyScrollTop = () => {
-    //chrome一众浏览器获取滚动条高度通过document.documentElement而uc浏览器是通过document.body获取
-    return this.realBody === document ? (document.documentElement.scrollTop || document.body.scrollTop): this.realBody.scrollTop
+    // chrome一众浏览器获取滚动条高度通过document.documentElement而uc浏览器是通过document.body获取
+    return this.realBody === document ? (document.documentElement.scrollTop || document.body.scrollTop) : this.realBody.scrollTop
   }
+
   render() {
     const {children, loading, prefixCls, isShowGotoTop, GotoTop} = this.props,
       bodyStyle = {
@@ -211,6 +221,7 @@ export default class Refresh extends Component {
 }
 
 Refresh.propTypes = {
+  onRefresh: PropTypes.func,
   isRefresh: PropTypes.bool,
   loading: PropTypes.object,
   prefixCls: PropTypes.string,
@@ -230,4 +241,5 @@ Refresh.defaultProps = {
   distanceToRefresh: 100,
   prefixCls: 'mi-refresh',
   scrollTargetSelector: '',
+  onRefresh: () => {},
 }
