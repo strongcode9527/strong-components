@@ -3,16 +3,62 @@
  */
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import classNames from 'classnames'
+import classNames from 'classnames';
 
-export default class Refresh extends Component {
+type MyProps = {
+  loading: object,
+  prefixCls: string,
+  GotoTop: Function,
+  resistance: number,
+  isRefresh: boolean,
+  onRefresh: Function,
+  isShowGotoTop: boolean,
+  defaultScrollTop: number,
+  distanceToRefresh: number,
+  operationCallback: Function,
+  handleScrollToZero: Function,
+  scrollTargetSelector: string,
+}
+
+type MyState = {
+  showTop: boolean,
+  isLoading: boolean,
+  moveDistance: number,
+  
+}
+
+export default class Scroll extends Component<MyProps, MyState> {
+  startY: number;
+  distance: number;
+  body: HTMLElement;
+  items: HTMLElement;
+  isLoading: boolean;
+  realBody: HTMLElement;
+  animation: HTMLElement;
+  startScrollTop: number;
+  
+  static defaultProps = {
+    isRefresh: true,
+    resistance: 2.5,
+    defaultScrollTop: 0,
+    onRefresh: () => {},
+    isShowGotoTop: true,
+    distanceToRefresh: 100,
+    prefixCls: 'mi-refresh',
+    scrollTargetSelector: '',
+    operationCallback: () => {},
+    handleScrollToZero: () => {},
+  }
+
   constructor(props) {
     super(props)
+
     this.state = {
       showTop: false,
       moveDistance: 0,
-      isLoading: false,
+      isLoading: false
     }
+
     this.startY = 0
     this.body = null //组建内部的body
     this.distance = 0
@@ -21,7 +67,6 @@ export default class Refresh extends Component {
     this.isLoading = false
     this.animation = null
     this.startScrollTop = 0
-    this.passiveSupported = false //判断是否支持addEventlistener 的 passive属性。
   }
 
   componentDidMount() {
@@ -79,7 +124,7 @@ export default class Refresh extends Component {
   }
 
   handleTouchStart = (e)  => {
-    const {operationCallback} = this.props
+    const { operationCallback } = this.props
     this.startY = e.touches[0].clientY
     this.startScrollTop = this.body.scrollTop
 
@@ -178,10 +223,10 @@ export default class Refresh extends Component {
    * 返回指定dom的滚动条高度
    */
 
-  getRealBodyScrollTop = () => {
-    // chrome一众浏览器获取滚动条高度通过document.documentElement而uc浏览器是通过document.body获取
-    return this.realBody === document ? (document.documentElement.scrollTop || document.body.scrollTop) : this.realBody.scrollTop
-  }
+  // getRealBodyScrollTop = () => {
+  //   // chrome一众浏览器获取滚动条高度通过document.documentElement而uc浏览器是通过document.body获取
+  //   return this.realBody === document ? (document.documentElement.scrollTop || document.body.scrollTop) : this.realBody.scrollTop
+  // }
 
   render() {
     const { 
@@ -245,29 +290,18 @@ export default class Refresh extends Component {
   }
 }
 
-Refresh.propTypes = {
-  onRefresh: PropTypes.func,
-  isRefresh: PropTypes.bool,
-  loading: PropTypes.object,
-  prefixCls: PropTypes.string,
-  resistance: PropTypes.number,
-  isShowGotoTop: PropTypes.bool,
-  operationCallback: PropTypes.func,
-  handleScrollToZero: PropTypes.func,
-  defaultScrollTop: PropTypes.number,
-  distanceToRefresh: PropTypes.number,
-  scrollTargetSelector: PropTypes.string,
-}
+// Scroll.propTypes = {
+//   onRefresh: PropTypes.func,
+//   isRefresh: PropTypes.bool,
+//   loading: PropTypes.object,
+//   prefixCls: PropTypes.string,
+//   resistance: PropTypes.number,
+//   isShowGotoTop: PropTypes.bool,
+//   operationCallback: PropTypes.func,
+//   handleScrollToZero: PropTypes.func,
+//   defaultScrollTop: PropTypes.number,
+//   distanceToRefresh: PropTypes.number,
+//   scrollTargetSelector: PropTypes.string,
+// }
 
-Refresh.defaultProps = {
-  isRefresh: true,
-  resistance: 2.5,
-  defaultScrollTop: 0,
-  onRefresh: () => {},
-  isShowGotoTop: true,
-  distanceToRefresh: 100,
-  prefixCls: 'mi-refresh',
-  scrollTargetSelector: '',
-  operationCallback: () => {},
-  handleScrollToZero: () => {},
-}
+

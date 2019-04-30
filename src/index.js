@@ -1,17 +1,6 @@
-import React, { Component } from 'react'
-import { render } from 'react-dom'
+import Scroll from './scroll'
 
-class App extends Component {
-  constructor(props) {
-    super(props)
-  }
-  render() {
-    return (
-      <div>
-        strong
-      </div>
-    )
-  }
+
+export {
+  Scroll
 }
-
-// render(<App />, document.getElementById('root'))

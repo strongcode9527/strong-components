@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { render } from 'react-dom'
-import Refresh from '../src/refresh'
+import { Scroll } from '../src'
 
 class App extends Component {
   constructor(props) {
@@ -9,11 +9,11 @@ class App extends Component {
 
   render() {
     return (
-      <Refresh height={300}>
+      <Scroll height={300}>
         <div>
           asdfasdfasddfasdfasdfasdfasdfasdf
         </div>
-      </Refresh>
+      </Scroll>
     )
   }
 }

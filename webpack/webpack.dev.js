@@ -1,17 +1,15 @@
 const webpack = require('webpack')
 const merge = require('webpack-merge')
 const common = require('./webpack.common')
-const HtmlWebpackPlugin  = require('html-webpack-plugin')
-      
-
+const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 common.entry.unshift('react-dev-utils/webpackHotDevClient')
 
 
-module.exports =  merge(common, {
+module.exports = merge(common, {
   mode: 'development',
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
-    new HtmlWebpackPlugin({template: './index.html'}) 
+    new HtmlWebpackPlugin({ template: './index.html' }) 
   ]
 })
