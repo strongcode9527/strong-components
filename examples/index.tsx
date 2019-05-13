@@ -13,6 +13,9 @@ class App extends Component {
         <div>
           asdfasdfasddfasdfasdfasdfasdfasdf
         </div>
+        <div>
+          strong
+        </div>
       </Scroll>
     )
   }
