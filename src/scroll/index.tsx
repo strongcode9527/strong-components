@@ -5,6 +5,13 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import classNames from 'classnames';
 
+
+declare global {
+  interface Window { REFRESH_DEFAULT_SCROLL_TOP: number }
+}
+
+window.REFRESH_DEFAULT_SCROLL_TOP = window.REFRESH_DEFAULT_SCROLL_TOP || 0;
+
 interface MyProps {
   loading: object;
   prefixCls: string;
@@ -20,11 +27,10 @@ interface MyProps {
   scrollTargetSelector: string;
 }
 
-type MyState = {
+interface MyState {
   showTop: boolean;
   isLoading: boolean;
   moveDistance: number;
-
 }
 
 export default class Scroll extends Component<MyProps, MyState> {
@@ -53,12 +59,6 @@ export default class Scroll extends Component<MyProps, MyState> {
   constructor(props) {
     super(props)
 
-    this.state = {
-      showTop: false,
-      moveDistance: 0,
-      isLoading: false
-    }
-
     this.startY = 0
     this.body = null //组建内部的body
     this.distance = 0
@@ -69,39 +69,15 @@ export default class Scroll extends Component<MyProps, MyState> {
     this.startScrollTop = 0
   }
 
+  state: MyState = {
+    showTop: false,
+    isLoading: false,
+    moveDistance: 20,
+  }
 
   componentDidMount() {
-    const { scrollTargetSelector, defaultScrollTop } = this.props
-    const self = this
 
-    // 处理body元素，并且绑定滚动事件
-    this.realBody = this.getScrollTarget(scrollTargetSelector)
-    this.realBody.scrollTop = defaultScrollTop
-    this.realBody.addEventListener('scroll', this.handleScroll)
-    /*
-     * 使用原生事件绑定方式，主要是因为react独特的事件绑定方式。
-     * react 会把事件绑定到document上面，这样就无法在第一时间禁止掉document的touchmove事件，导致页面下滑刷新整个页面。
-     * 如果没有在第一时间将document的touchmove禁止掉，就会发生如下warning：
-     * Ignored attempt to cancel a touchmove event with cancelable=false, for example because scrolling is in progress and cannot be interrupted.
-    */
 
-    this.items.addEventListener('touchmove', this.handleTouchMove, false)
-    this.items.addEventListener('touchstart', this.handleTouchStart, false)
-    this.items.addEventListener('touchend', this.handleTouchEnd, false)
-
-    // 判断 addEventListener('test', null, {passive: false}) 绑定方式是否支持。
-    // 主要是兼容uc浏览器
-    //   try {
-    //     const options = Object.defineProperty({}, "passive", {
-    //       get: function() {
-    //         self.passiveSupported = true;
-    //       }
-    //     });
-    //     window.addEventListener("test", null, options);
-    //   } catch(err) {
-    //     alert(err)
-    //   }
-    // }
   }
 
   // 处理在网页的轮动条滚动时，改变监控的滚动条对象。和react的渲染机制进行匹配。
@@ -136,6 +112,7 @@ export default class Scroll extends Component<MyProps, MyState> {
     }
     operationCallback && operationCallback()
   }
+
   handleTouchMove = (e) => {
     const {resistance, isRefresh} = this.props
     if(!isRefresh) {
@@ -181,53 +158,6 @@ export default class Scroll extends Component<MyProps, MyState> {
     })
   }
 
-  goToTop = () => {
-    this.realBody.scrollTop = 0
-  }
-
-  handleScroll = () => {
-    const { handleScrollToZero } = this.props
-
-    if (handleScrollToZero && typeof handleScrollToZero !== 'function') {
-      throw new Error('handleScrollToZero must be a function')
-    }
-
-    if (handleScrollToZero) {
-      handleScrollToZero()
-    }
-
-    if (this.realBody.scrollTop > 100) {
-      this.setState({ showTop: true })
-    } else {
-      this.setState({ showTop: false })
-    }
-  }
-
-  /**
-   * 类似于jquery的元素选择器，
-   *  target 为空返回document
-   * @param {String} target
-   */
-
-  getScrollTarget = (target) => {
-    return !target
-        ? this.body
-        : target === 'document'
-            ? document
-            : target === 'body'
-                ? document.body
-                : document.querySelector(target) || document
-  }
-
-  /**
-   * 返回指定dom的滚动条高度
-   */
-
-  // getRealBodyScrollTop = () => {
-  //   // chrome一众浏览器获取滚动条高度通过document.documentElement而uc浏览器是通过document.body获取
-  //   return this.realBody === document ? (document.documentElement.scrollTop || document.body.scrollTop) : this.realBody.scrollTop
-  // }
-
   render() {
     const {
       GotoTop,
@@ -254,50 +184,43 @@ export default class Scroll extends Component<MyProps, MyState> {
     const childrenLength = React.Children.count(children)
 
     return (
-        <div
-            style={bodyStyle}
-            ref={body => this.body = body}
-            className={classNames(`${prefixCls}-body`, { [`${prefixCls}-refresh-loading`]: isLoading })}
-        >
-          {/* loading动画的 */}
-          <div ref={animation => this.animation = animation} className={`${prefixCls}-ptr-element`} style={moveStyle}>
-            <span className={`${prefixCls}-genericon ${prefixCls}-genericon-next`} />
-            {
-              loading && (
-                  <div className={`${prefixCls}-loading`}>
-                    <span className={`${prefixCls}-loading-ptr-1`} />
-                    <span className={`${prefixCls}-loading-ptr-2`} />
-                    <span className={`${prefixCls}-loading-ptr-3`} />
-                  </div>
-              )
-            }
-          </div>
-          {/* scroller内容的真正的 */}
-
+      <div
+        style={bodyStyle}
+        ref={body => this.body = body}
+        className={classNames(`${prefixCls}-body`, { [`${prefixCls}-refresh-loading`]: isLoading })}
+      >
+        {/* loading动画的 */}
+        <div ref={animation => this.animation = animation} className={`${prefixCls}-ptr-element`} style={moveStyle}>
+          <span className={`${prefixCls}-genericon ${prefixCls}-genericon-next`} />
           {
-            childrenLength === 1
-                ? React.Children.only(children)
-                : (
-                    <div
-                        style={moveStyle}
-                        ref={(items) => this.items = items}
-                        className={`${prefixCls}-refresh-view`}
-                    >
-                      {children}
-                    </div>
-                )
+            loading && (
+              <div className={`${prefixCls}-loading`}>
+                <span className={`${prefixCls}-loading-ptr-1`} />
+                <span className={`${prefixCls}-loading-ptr-2`} />
+                <span className={`${prefixCls}-loading-ptr-3`} />
+              </div>
+            )
           }
-
-          <div>
-            {
-              isShowGotoTop && showTop && (
-                  <div onTouchStart={this.goToTop}>
-                    { GotoTop || <div className={`${prefixCls}-goto_top`} /> }
-                  </div>
-              )
-            }
-          </div>
         </div>
+        {/* scroller内容的真正的 */}
+
+        {
+          childrenLength === 1
+            ? React.Children.only(children)
+            : (
+              <div
+                style={moveStyle}
+                ref={(items) => this.items = items}
+                className={`${prefixCls}-refresh-view`}
+              >
+                {children}
+              </div>
+            )
+        }
+
+        <div>
+        </div>
+      </div>
     )
   }
 }
