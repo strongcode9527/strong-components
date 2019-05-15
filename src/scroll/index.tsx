@@ -1,7 +1,7 @@
 /**
  * Created by strong on 2017/8/4.
  */
-import React, { Component } from 'react'
+import React, { Component, TouchEvent, ReactNode, CSSProperties } from 'react'
 import PropTypes from 'prop-types'
 import classNames from 'classnames';
 
@@ -33,6 +33,11 @@ interface MyState {
   moveDistance: number;
 }
 
+interface Style {
+  bodyStyle: CSSProperties;
+  moveStyle: CSSProperties;
+}
+
 export default class Scroll extends Component<MyProps, MyState> {
   startY: number;
   distance: number;
@@ -47,13 +52,13 @@ export default class Scroll extends Component<MyProps, MyState> {
     isRefresh: true,
     resistance: 2.5,
     defaultScrollTop: 0,
-    onRefresh: () => {},
+    onRefresh: (): void => {},
     isShowGotoTop: true,
     distanceToRefresh: 100,
     prefixCls: 'mi-refresh',
     scrollTargetSelector: '',
-    operationCallback: () => {},
-    handleScrollToZero: () => {},
+    operationCallback: (): void => {},
+    handleScrollToZero: (): void => {},
   }
 
   constructor(props) {
@@ -75,33 +80,13 @@ export default class Scroll extends Component<MyProps, MyState> {
     moveDistance: 20,
   }
 
-  componentDidMount() {
-
+  componentDidMount(): void {
 
   }
 
-  // 处理在网页的轮动条滚动时，改变监控的滚动条对象。和react的渲染机制进行匹配。
-  componentWillReceiveProps({ scrollTargetSelector, defaultScrollTop }) {
-    if (scrollTargetSelector !== this.props.scrollTargetSelector) {
-      // 在绑定之前先将之前realbody的绑定事件去掉
-      this.realBody.removeEventListener('scroll', this.handleScroll)
-      // 处理新的realbody
-      this.realBody = this.getScrollTarget(scrollTargetSelector)
-      this.realBody.addEventListener('scroll', this.handleScroll)
-      this.realBody.scrollTop = defaultScrollTop
-    }
-  }
-
-  componentWillUnmount() {
-    this.realBody.removeEventListener('scroll', this.handleScroll)
-
-    // !this.browserIsUc && document.removeEventListener('touchmove', this.handleCancelMove)
-
-    window.REFRESH_DEFAULT_SCROLL_TOP = this.realBody.scrollTop
-  }
 
   // eslint-disable-next-line @typescript-eslint/explicit-member-accessibility
-  handleTouchStart = (e)  => {
+  handleTouchStart = (e: TouchEvent): void  => {
     const { operationCallback } = this.props
     this.startY = e.touches[0].clientY
     this.startScrollTop = this.body.scrollTop
@@ -113,7 +98,7 @@ export default class Scroll extends Component<MyProps, MyState> {
     operationCallback && operationCallback()
   }
 
-  handleTouchMove = (e) => {
+  handleTouchMove = (e: TouchEvent): void => {
     const {resistance, isRefresh} = this.props
     if(!isRefresh) {
       return
@@ -126,7 +111,7 @@ export default class Scroll extends Component<MyProps, MyState> {
     })
   }
 
-  handleTouchEnd = (event) => {
+  handleTouchEnd = (): void => {
     const { distanceToRefresh } = this.props
     if (this.distance > distanceToRefresh && !this.startScrollTop && !this.isLoading) {
       this.setState({
@@ -140,25 +125,23 @@ export default class Scroll extends Component<MyProps, MyState> {
         moveDistance: 0,
       })
     }
-    document.removeEventListener('touchmove', this.handleCancelMove)
+    // document.removeEventListener('touchmove', this.handleCancelMove)
   }
 
-  handleCancelMove = (e) => {
-    e.preventDefault()
-  }
 
-  loading = async () => {
+  loading = async (): Promise<void> => {
     const { onRefresh } = this.props
-    await new Promise((resolve, reject) => { onRefresh(resolve, reject) })
+    
     this.distance = 0
     this.isLoading = false
     this.setState({
       moveDistance: 0,
       isLoading: false,
     })
+    return await new Promise((resolve, reject): void => { onRefresh(resolve, reject) })
   }
 
-  render() {
+  render(): ReactNode {
     const {
       GotoTop,
       loading,
@@ -173,24 +156,27 @@ export default class Scroll extends Component<MyProps, MyState> {
       moveDistance,
     } = this.state
 
-    const bodyStyle = {
-      position: 'relative',
-    }
 
-    const moveStyle = {
-      transform: `translate3d(0,${moveDistance}px,0)`,
+    const style: Style = {
+      bodyStyle: {
+        position: 'relative',
+      },
+      moveStyle: {
+        transform: `translate3d(0,${moveDistance}px,0)`,
+      }
     }
+ 
 
     const childrenLength = React.Children.count(children)
 
     return (
       <div
-        style={bodyStyle}
-        ref={body => this.body = body}
+        style={style.bodyStyle}
+        ref={(body): void => {this.body = body}}
         className={classNames(`${prefixCls}-body`, { [`${prefixCls}-refresh-loading`]: isLoading })}
       >
         {/* loading动画的 */}
-        <div ref={animation => this.animation = animation} className={`${prefixCls}-ptr-element`} style={moveStyle}>
+        <div ref={(animation): void => {this.animation = animation}} className={`${prefixCls}-ptr-element`} style={style.moveStyle}>
           <span className={`${prefixCls}-genericon ${prefixCls}-genericon-next`} />
           {
             loading && (
@@ -209,8 +195,8 @@ export default class Scroll extends Component<MyProps, MyState> {
             ? React.Children.only(children)
             : (
               <div
-                style={moveStyle}
-                ref={(items) => this.items = items}
+                style={style.moveStyle}
+                ref={(items): void => {this.items = items}}
                 className={`${prefixCls}-refresh-view`}
               >
                 {children}
