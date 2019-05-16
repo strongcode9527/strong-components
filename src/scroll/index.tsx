@@ -4,6 +4,7 @@
 import React, { Component, TouchEvent, ReactNode, CSSProperties } from 'react'
 import classNames from 'classnames';
 import './index.less'
+import { number } from 'prop-types';
 
 declare global {
   interface Window { REFRESH_DEFAULT_SCROLL_TOP: number }
@@ -28,8 +29,10 @@ interface MyProps {
 
 interface MyState {
   showTop: boolean;
+  isTransition: boolean;
   isLoading: boolean;
-  moveDistance: number;
+  currentY: number;
+  preventY: number;
 }
 
 interface Style {
@@ -75,15 +78,16 @@ export default class Scroll extends Component<MyProps, MyState> {
   state: MyState = {
     showTop: false,
     isLoading: false,
-    moveDistance: 0,
+    currentY: 0,
+    preventY: 0,
+    isTransition: false,
   }
 
   componentDidMount(): void {
     this.containerHeight = this.body.clientHeight
-    document.body.addEventListener('touchmove', (e): void => {
-      // e.stopPropagation()
-      e.preventDefault()
-    })
+    this.body.addEventListener('touchmove', this.handleTouchMove, false)
+    this.body.addEventListener('touchstart', this.handleTouchStart, false)
+    this.body.addEventListener('touchend', this.handleTouchEnd, false)
   }
 
 
@@ -97,40 +101,39 @@ export default class Scroll extends Component<MyProps, MyState> {
     if(operationCallback && typeof operationCallback !== 'function') {
       throw new Error('handleScrollToZero must be a function')
     }
+    this.setState({
+      isTransition: false,
+    })
     e.stopPropagation()
     e.preventDefault()
     operationCallback && operationCallback()
   }
 
   handleTouchMove = (e: TouchEvent): void => {
-    const {resistance, isRefresh} = this.props
+    const { isRefresh } = this.props
+    const { preventY } = this.state
+
     if(!isRefresh) {
       return
     }
     e.stopPropagation()
     e.preventDefault()
-    this.distance = (e.touches[0].clientY - this.startY) / resistance
-
+    this.distance = e.touches[0].clientY - this.startY
+    console.log(this.distance, this.startY , e.touches[0].clientY)
     this.setState({
-      moveDistance: this.distance
+      isTransition: false,
+      currentY: preventY + this.distance,
     })
   }
 
   handleTouchEnd = (): void => {
-    const { distanceToRefresh } = this.props
-    if (this.distance > distanceToRefresh && !this.startScrollTop && !this.isLoading) {
-      this.setState({
-        isLoading: true,
-        moveDistance: 0,
-      })
-      this.isLoading = true
-      this.loading()
-    } else {
-      this.setState({
-        moveDistance: 0,
-      })
-    }
-    // document.removeEventListener('touchmove', this.handleCancelMove)
+    const { currentY } = this.state;
+    
+    this.setState({
+      preventY: currentY - 50,
+      currentY: currentY - 50,
+      isTransition: true,
+    })
   }
 
 
@@ -155,16 +158,20 @@ export default class Scroll extends Component<MyProps, MyState> {
 
     const {
       isLoading,
-      moveDistance,
+      currentY,
+      isTransition,
     } = this.state
 
+    console.log(currentY)
 
     const style: Style = {
       bodyStyle: {
         position: 'relative',
       },
       moveStyle: {
-        transform: `translate(0,${moveDistance}px) translateZ(0px)`,
+        transition: `all ${isTransition ? 300 : 0}ms`,
+        transform: `translate3d(0, ${currentY}px, 0)`,
+        transitionTimingFunction: 'cubic-bezier(0.1, 0.57, 0.1, 1)'
       }
     }
  
@@ -174,9 +181,6 @@ export default class Scroll extends Component<MyProps, MyState> {
     return (
       <div
         style={style.bodyStyle}
-        onTouchEnd={this.handleTouchEnd}
-        onTouchMove={this.handleTouchMove}
-        onTouchStart={this.handleTouchStart}
         ref={(body): void => {this.body = body}}
         className={classNames(`${prefixCls}-body`, { [`${prefixCls}-refresh-loading`]: isLoading })}
       >

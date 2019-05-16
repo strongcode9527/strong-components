@@ -10,12 +10,13 @@ class App extends Component {
   render() {
     return (
       <Scroll height={300}>
-        <div>
-          asdfasdfasddfasdfasdfasdfasdfasdf
-        </div>
-        <div>
-          strong
-        </div>
+        {
+          new Array(100).fill(1).map((item, index) => (
+            <div>
+              strong{index}
+            </div>
+          ))
+        }
       </Scroll>
     )
   }
