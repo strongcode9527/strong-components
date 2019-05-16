@@ -2,9 +2,8 @@
  * Created by strong on 2017/8/4.
  */
 import React, { Component, TouchEvent, ReactNode, CSSProperties } from 'react'
-import PropTypes from 'prop-types'
 import classNames from 'classnames';
-
+import './index.less'
 
 declare global {
   interface Window { REFRESH_DEFAULT_SCROLL_TOP: number }
@@ -44,10 +43,10 @@ export default class Scroll extends Component<MyProps, MyState> {
   body: HTMLElement;
   items: HTMLElement;
   isLoading: boolean;
-  realBody: HTMLElement;
   animation: HTMLElement;
   startScrollTop: number;
-
+  containerHeight: number;
+  
   static defaultProps = {
     isRefresh: true,
     resistance: 2.5,
@@ -61,27 +60,30 @@ export default class Scroll extends Component<MyProps, MyState> {
     handleScrollToZero: (): void => {},
   }
 
-  constructor(props) {
+  constructor(props: MyProps) {
     super(props)
-
     this.startY = 0
     this.body = null //组建内部的body
     this.distance = 0
     this.items = null
-    this.realBody = null //经过处理后的body
-    this.isLoading = false
     this.animation = null
+    this.isLoading = false
     this.startScrollTop = 0
+    this.containerHeight = 0
   }
 
   state: MyState = {
     showTop: false,
     isLoading: false,
-    moveDistance: 20,
+    moveDistance: 0,
   }
 
   componentDidMount(): void {
-
+    this.containerHeight = this.body.clientHeight
+    document.body.addEventListener('touchmove', (e): void => {
+      // e.stopPropagation()
+      e.preventDefault()
+    })
   }
 
 
@@ -95,6 +97,8 @@ export default class Scroll extends Component<MyProps, MyState> {
     if(operationCallback && typeof operationCallback !== 'function') {
       throw new Error('handleScrollToZero must be a function')
     }
+    e.stopPropagation()
+    e.preventDefault()
     operationCallback && operationCallback()
   }
 
@@ -103,7 +107,8 @@ export default class Scroll extends Component<MyProps, MyState> {
     if(!isRefresh) {
       return
     }
-
+    e.stopPropagation()
+    e.preventDefault()
     this.distance = (e.touches[0].clientY - this.startY) / resistance
 
     this.setState({
@@ -143,15 +148,12 @@ export default class Scroll extends Component<MyProps, MyState> {
 
   render(): ReactNode {
     const {
-      GotoTop,
       loading,
       children,
       prefixCls,
-      isShowGotoTop
     } = this.props
 
     const {
-      showTop,
       isLoading,
       moveDistance,
     } = this.state
@@ -162,7 +164,7 @@ export default class Scroll extends Component<MyProps, MyState> {
         position: 'relative',
       },
       moveStyle: {
-        transform: `translate3d(0,${moveDistance}px,0)`,
+        transform: `translate(0,${moveDistance}px) translateZ(0px)`,
       }
     }
  
@@ -172,6 +174,9 @@ export default class Scroll extends Component<MyProps, MyState> {
     return (
       <div
         style={style.bodyStyle}
+        onTouchEnd={this.handleTouchEnd}
+        onTouchMove={this.handleTouchMove}
+        onTouchStart={this.handleTouchStart}
         ref={(body): void => {this.body = body}}
         className={classNames(`${prefixCls}-body`, { [`${prefixCls}-refresh-loading`]: isLoading })}
       >

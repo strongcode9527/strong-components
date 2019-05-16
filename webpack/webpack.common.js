@@ -20,6 +20,19 @@ module.exports = {
           },
         ],
       },
+      {
+        test: /\.less$/,
+        use: [
+          require.resolve('style-loader'),
+          {
+            loader: require.resolve('css-loader'),
+            options: {
+              importLoaders: 1,
+            },
+          },
+          require.resolve('less-loader'),
+        ],
+      },
     ],
   },
   devtool: 'inline-source-map',
