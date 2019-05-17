@@ -44,12 +44,13 @@ export default class Scroll extends Component<MyProps, MyState> {
   startY: number;
   distance: number;
   body: HTMLElement;
+  startTime: number;
   items: HTMLElement;
   isLoading: boolean;
   animation: HTMLElement;
   startScrollTop: number;
   containerHeight: number;
-  
+
   static defaultProps = {
     isRefresh: true,
     resistance: 2.5,
@@ -104,8 +105,12 @@ export default class Scroll extends Component<MyProps, MyState> {
     this.setState({
       isTransition: false,
     })
+
     e.stopPropagation()
     e.preventDefault()
+
+    this.startTime = new Date().valueOf()
+
     operationCallback && operationCallback()
   }
 
@@ -116,24 +121,37 @@ export default class Scroll extends Component<MyProps, MyState> {
     if(!isRefresh) {
       return
     }
+
     e.stopPropagation()
     e.preventDefault()
+
     this.distance = e.touches[0].clientY - this.startY
-    console.log(this.distance, this.startY , e.touches[0].clientY)
+
     this.setState({
       isTransition: false,
       currentY: preventY + this.distance,
     })
+
   }
 
   handleTouchEnd = (): void => {
     const { currentY } = this.state;
+    const isMovingUp = this.distance < 0;
+    const isMoving = this.distance !== 0;
     
+    const touchOfDuration = new Date().valueOf() - this.startTime;
+
+    const inertiaDistance =  touchOfDuration < 200 && isMoving ? (isMovingUp ? -300 : 300)  : 0;
+
+
+
+    const positionY = currentY + inertiaDistance;
+
     this.setState({
-      preventY: currentY - 50,
-      currentY: currentY - 50,
+      preventY: positionY,
+      currentY: positionY,
       isTransition: true,
-    })
+    });
   }
 
 
@@ -162,14 +180,13 @@ export default class Scroll extends Component<MyProps, MyState> {
       isTransition,
     } = this.state
 
-    console.log(currentY)
 
     const style: Style = {
       bodyStyle: {
         position: 'relative',
       },
       moveStyle: {
-        transition: `all ${isTransition ? 300 : 0}ms`,
+        transition: `all ${isTransition ? 600 : 0}ms`,
         transform: `translate3d(0, ${currentY}px, 0)`,
         transitionTimingFunction: 'cubic-bezier(0.1, 0.57, 0.1, 1)'
       }

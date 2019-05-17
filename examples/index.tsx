@@ -11,7 +11,7 @@ class App extends Component {
     return (
       <Scroll height={300}>
         {
-          new Array(100).fill(1).map((item, index) => (
+          new Array(1000).fill(1).map((item, index) => (
             <div>
               strong{index}
             </div>
