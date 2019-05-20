@@ -1,7 +1,7 @@
 /**
  * Created by strong on 2017/8/4.
  */
-import React, { Component, TouchEvent, ReactNode, CSSProperties } from 'react'
+import React, { Component, ReactNode, CSSProperties } from 'react'
 import classNames from 'classnames';
 import './index.less'
 import { number } from 'prop-types';
@@ -29,10 +29,11 @@ interface MyProps {
 
 interface MyState {
   showTop: boolean;
-  isTransition: boolean;
-  isLoading: boolean;
   currentY: number;
   preventY: number;
+  isLoading: boolean;
+  moveDistance: number;
+  isTransition: boolean;
 }
 
 interface Style {
@@ -50,7 +51,7 @@ export default class Scroll extends Component<MyProps, MyState> {
   animation: HTMLElement;
   startScrollTop: number;
   containerHeight: number;
-
+  limitRollingHeight: number;
   static defaultProps = {
     isRefresh: true,
     resistance: 2.5,
@@ -74,21 +75,30 @@ export default class Scroll extends Component<MyProps, MyState> {
     this.isLoading = false
     this.startScrollTop = 0
     this.containerHeight = 0
+    this.limitRollingHeight = 0
   }
 
   state: MyState = {
-    showTop: false,
-    isLoading: false,
     currentY: 0,
     preventY: 0,
+    showTop: false,
+    moveDistance: 0,
+    isLoading: false,
     isTransition: false,
   }
 
   componentDidMount(): void {
     this.containerHeight = this.body.clientHeight
+
+    // 因为滚动高度是负值，所以颠倒相减的顺序
+    this.limitRollingHeight = this.containerHeight - this.items.clientHeight
+
     this.body.addEventListener('touchmove', this.handleTouchMove, false)
     this.body.addEventListener('touchstart', this.handleTouchStart, false)
     this.body.addEventListener('touchend', this.handleTouchEnd, false)
+
+    console.log(this.limitRollingHeight)
+
   }
 
 
@@ -102,6 +112,7 @@ export default class Scroll extends Component<MyProps, MyState> {
     if(operationCallback && typeof operationCallback !== 'function') {
       throw new Error('handleScrollToZero must be a function')
     }
+
     this.setState({
       isTransition: false,
     })
@@ -143,9 +154,15 @@ export default class Scroll extends Component<MyProps, MyState> {
 
     const inertiaDistance =  touchOfDuration < 200 && isMoving ? (isMovingUp ? -300 : 300)  : 0;
 
+    let positionY = currentY + inertiaDistance;
 
+    if(positionY > 0) {
+      positionY = 0;
+    }
 
-    const positionY = currentY + inertiaDistance;
+    if(positionY < this.limitRollingHeight) {
+      positionY = this.limitRollingHeight
+    }
 
     this.setState({
       preventY: positionY,
@@ -192,7 +209,7 @@ export default class Scroll extends Component<MyProps, MyState> {
       }
     }
  
-
+    console.log(currentY)
     const childrenLength = React.Children.count(children)
 
     return (
