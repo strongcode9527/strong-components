@@ -4,7 +4,8 @@
 import React, { Component, ReactNode, CSSProperties } from 'react'
 import classNames from 'classnames';
 import './index.less'
-import { number } from 'prop-types';
+
+const ThemeContext = React.createContext({});
 
 declare global {
   interface Window { REFRESH_DEFAULT_SCROLL_TOP: number }
@@ -209,47 +210,48 @@ export default class Scroll extends Component<MyProps, MyState> {
       }
     }
  
-    console.log(currentY)
     const childrenLength = React.Children.count(children)
 
     return (
-      <div
-        style={style.bodyStyle}
-        ref={(body): void => {this.body = body}}
-        className={classNames(`${prefixCls}-body`, { [`${prefixCls}-refresh-loading`]: isLoading })}
-      >
-        {/* loading动画的 */}
-        <div ref={(animation): void => {this.animation = animation}} className={`${prefixCls}-ptr-element`} style={style.moveStyle}>
-          <span className={`${prefixCls}-genericon ${prefixCls}-genericon-next`} />
+      <ThemeContext.Provider value={this}>
+        <div
+          style={style.bodyStyle}
+          ref={(body): void => {this.body = body}}
+          className={classNames(`${prefixCls}-body`, { [`${prefixCls}-refresh-loading`]: isLoading })}
+        >
+          {/* loading动画的 */}
+          <div ref={(animation): void => {this.animation = animation}} className={`${prefixCls}-ptr-element`} style={style.moveStyle}>
+            <span className={`${prefixCls}-genericon ${prefixCls}-genericon-next`} />
+            {
+              loading && (
+                <div className={`${prefixCls}-loading`}>
+                  <span className={`${prefixCls}-loading-ptr-1`} />
+                  <span className={`${prefixCls}-loading-ptr-2`} />
+                  <span className={`${prefixCls}-loading-ptr-3`} />
+                </div>
+              )
+            }
+          </div>
+          {/* scroller内容的真正的 */}
+
           {
-            loading && (
-              <div className={`${prefixCls}-loading`}>
-                <span className={`${prefixCls}-loading-ptr-1`} />
-                <span className={`${prefixCls}-loading-ptr-2`} />
-                <span className={`${prefixCls}-loading-ptr-3`} />
-              </div>
-            )
+            childrenLength === 1
+              ? React.Children.only(children)
+              : (
+                <div
+                  style={style.moveStyle}
+                  ref={(items): void => {this.items = items}}
+                  className={`${prefixCls}-refresh-view`}
+                >
+                  {children}
+                </div>
+              )
           }
-        </div>
-        {/* scroller内容的真正的 */}
 
-        {
-          childrenLength === 1
-            ? React.Children.only(children)
-            : (
-              <div
-                style={style.moveStyle}
-                ref={(items): void => {this.items = items}}
-                className={`${prefixCls}-refresh-view`}
-              >
-                {children}
-              </div>
-            )
-        }
-
-        <div>
+          <div>
+          </div>
         </div>
-      </div>
+      </ThemeContext.Provider>
     )
   }
 }
