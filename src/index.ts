@@ -1,4 +1,4 @@
-import Scroll from './scroll'
+import Scroll from './scroll';
 
 
 export {

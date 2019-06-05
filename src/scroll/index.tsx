@@ -1,11 +1,10 @@
-/**
- * Created by strong on 2017/8/4.
- */
-import React, { Component, ReactNode, CSSProperties } from 'react'
+import React, { Component, ReactNode, CSSProperties } from 'react';
 import classNames from 'classnames';
-import './index.less'
+import './index.less';
+import Sticky from './sticky';
+import ThemeContext from './context';
 
-const ThemeContext = React.createContext({});
+
 
 declare global {
   interface Window { REFRESH_DEFAULT_SCROLL_TOP: number }
@@ -42,6 +41,15 @@ interface Style {
   moveStyle: CSSProperties;
 }
 
+interface StickiesInterface {
+  stickies: [any];
+}
+
+
+
+
+
+
 export default class Scroll extends Component<MyProps, MyState> {
   startY: number;
   distance: number;
@@ -53,6 +61,8 @@ export default class Scroll extends Component<MyProps, MyState> {
   startScrollTop: number;
   containerHeight: number;
   limitRollingHeight: number;
+  stickies: {stickies: ['adsfasdfasf']};
+
   static defaultProps = {
     isRefresh: true,
     resistance: 2.5,
@@ -66,17 +76,23 @@ export default class Scroll extends Component<MyProps, MyState> {
     handleScrollToZero: (): void => {},
   }
 
+  static Sticky = Sticky;
+
   constructor(props: MyProps) {
-    super(props)
-    this.startY = 0
-    this.body = null //组建内部的body
-    this.distance = 0
-    this.items = null
-    this.animation = null
-    this.isLoading = false
-    this.startScrollTop = 0
-    this.containerHeight = 0
-    this.limitRollingHeight = 0
+    super(props);
+
+    this.startY = 0;
+    this.body = null; //组建内部的body
+    this.distance = 0;
+    this.items = null;
+    this.animation = null;
+    this.isLoading = false;
+    this.startScrollTop = 0;
+    this.containerHeight = 0;
+    this.limitRollingHeight = 0;
+    this.stickies = {
+      stickies: []
+    }
   }
 
   state: MyState = {
@@ -105,44 +121,44 @@ export default class Scroll extends Component<MyProps, MyState> {
 
   // eslint-disable-next-line @typescript-eslint/explicit-member-accessibility
   handleTouchStart = (e: TouchEvent): void  => {
-    const { operationCallback } = this.props
-    this.startY = e.touches[0].clientY
-    this.startScrollTop = this.body.scrollTop
+    const { operationCallback } = this.props;
+    this.startY = e.touches[0].clientY;
+    this.startScrollTop = this.body.scrollTop;
 
     // 当触碰到整个组件的时候，调用回调函数
     if(operationCallback && typeof operationCallback !== 'function') {
-      throw new Error('handleScrollToZero must be a function')
+      throw new Error('handleScrollToZero must be a function');
     }
 
     this.setState({
       isTransition: false,
-    })
+    });
 
-    e.stopPropagation()
-    e.preventDefault()
+    e.stopPropagation();
+    e.preventDefault();
 
-    this.startTime = new Date().valueOf()
+    this.startTime = new Date().valueOf();
 
-    operationCallback && operationCallback()
+    operationCallback && operationCallback();
   }
 
   handleTouchMove = (e: TouchEvent): void => {
-    const { isRefresh } = this.props
-    const { preventY } = this.state
+    const { isRefresh } = this.props;
+    const { preventY } = this.state;
 
     if(!isRefresh) {
-      return
+      return void 0;
     }
 
-    e.stopPropagation()
-    e.preventDefault()
+    e.stopPropagation();
+    e.preventDefault();
 
-    this.distance = e.touches[0].clientY - this.startY
+    this.distance = e.touches[0].clientY - this.startY;
 
     this.setState({
       isTransition: false,
       currentY: preventY + this.distance,
-    })
+    });
 
   }
 
@@ -162,7 +178,7 @@ export default class Scroll extends Component<MyProps, MyState> {
     }
 
     if(positionY < this.limitRollingHeight) {
-      positionY = this.limitRollingHeight
+      positionY = this.limitRollingHeight;
     }
 
     this.setState({
@@ -174,15 +190,15 @@ export default class Scroll extends Component<MyProps, MyState> {
 
 
   loading = async (): Promise<void> => {
-    const { onRefresh } = this.props
+    const { onRefresh } = this.props;
     
-    this.distance = 0
-    this.isLoading = false
+    this.distance = 0;
+    this.isLoading = false;
     this.setState({
       moveDistance: 0,
       isLoading: false,
-    })
-    return await new Promise((resolve, reject): void => { onRefresh(resolve, reject) })
+    });
+    return await new Promise((resolve, reject): void => { onRefresh(resolve, reject); });
   }
 
   render(): ReactNode {
@@ -190,13 +206,13 @@ export default class Scroll extends Component<MyProps, MyState> {
       loading,
       children,
       prefixCls,
-    } = this.props
+    } = this.props;
 
     const {
       isLoading,
       currentY,
       isTransition,
-    } = this.state
+    } = this.state;
 
 
     const style: Style = {
@@ -208,12 +224,12 @@ export default class Scroll extends Component<MyProps, MyState> {
         transform: `translate3d(0, ${currentY}px, 0)`,
         transitionTimingFunction: 'cubic-bezier(0.1, 0.57, 0.1, 1)'
       }
-    }
+    };
  
     const childrenLength = React.Children.count(children)
 
     return (
-      <ThemeContext.Provider value={this}>
+      <ThemeContext.Provider value={this.stickies}>
         <div
           style={style.bodyStyle}
           ref={(body): void => {this.body = body}}
@@ -240,7 +256,7 @@ export default class Scroll extends Component<MyProps, MyState> {
               : (
                 <div
                   style={style.moveStyle}
-                  ref={(items): void => {this.items = items}}
+                  ref={(items): void => {this.items = items;}}
                   className={`${prefixCls}-refresh-view`}
                 >
                   {children}
@@ -252,7 +268,7 @@ export default class Scroll extends Component<MyProps, MyState> {
           </div>
         </div>
       </ThemeContext.Provider>
-    )
+    );
   }
 }
 
