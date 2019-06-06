@@ -4,8 +4,6 @@
 import React, { Component, ReactNode, CSSProperties } from 'react';
 import ThemeContext from './context';
 
-console.log('stick', ThemeContext);
-
 interface MyProps {
 
 }
@@ -20,7 +18,7 @@ interface Style {
 }
 
 export default class Sticky extends Component<MyProps, MyState> {
-
+  ref: HTMLElement;
   static defaultProps = {
 
   }
@@ -31,10 +29,9 @@ export default class Sticky extends Component<MyProps, MyState> {
     super(props);
   }
 
-  componentDidMount() {
-    this.context.stickies.push(this.ref)
+  componentDidMount(): void {
+    this.context.stickies.push(this);
   }
-
 
   
   render(): ReactNode {
