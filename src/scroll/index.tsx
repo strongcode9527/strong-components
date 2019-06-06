@@ -61,7 +61,7 @@ export default class Scroll extends Component<MyProps, MyState> {
   startScrollTop: number;
   containerHeight: number;
   limitRollingHeight: number;
-  stickies: {stickies: ['adsfasdfasf']};
+  stickies: {stickies: [any]};
 
   static defaultProps = {
     isRefresh: true,
@@ -145,7 +145,7 @@ export default class Scroll extends Component<MyProps, MyState> {
   handleTouchMove = (e: TouchEvent): void => {
     const { isRefresh } = this.props;
     const { preventY } = this.state;
-
+  
     if(!isRefresh) {
       return void 0;
     }

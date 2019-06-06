@@ -32,7 +32,7 @@ export default class Sticky extends Component<MyProps, MyState> {
   }
 
   componentDidMount() {
-    console.log('didmount', this.context)
+    this.context.stickies.push(this.ref)
   }
 
 
@@ -40,14 +40,13 @@ export default class Sticky extends Component<MyProps, MyState> {
   render(): ReactNode {
     const {
       children,
-    } = this.props
+    } = this.props;
 
     return (
-
-      <div>
+      <div ref={(ref): void => { this.ref = ref; }}>
         {children}
       </div>
-    )
+    );
   }
 }
 
