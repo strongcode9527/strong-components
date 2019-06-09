@@ -114,8 +114,6 @@ export default class Scroll extends Component<MyProps, MyState> {
     this.body.addEventListener('touchstart', this.handleTouchStart, false);
     this.body.addEventListener('touchend', this.handleTouchEnd, false);
 
-    console.log(this.stickies)
-
   }
 
 
@@ -227,10 +225,12 @@ export default class Scroll extends Component<MyProps, MyState> {
     };
  
     const childrenLength = React.Children.count(children);
-    const stickiesReactElement = React.Children.map(this.stickies.stickies, item => 
-      React.cloneElement(item, {style: {position: 'fixed', top: 0}})
-    );
-    console.log('adfaf', stickiesReactElement, this.props.children)
+    // const stickiesReactElement = React.Children.map(this.stickies.stickies, item => 
+    //   React.cloneElement(item, {style: {position: 'fixed', top: 0}})
+    // );
+    // console.log('asdfasdf', stickiesReactElement, this.stickies.stickies)
+    const stick = this.stickies.stickies[0] 
+    console.log(this.stickies.stickies)
     return (
       <ThemeContext.Provider value={this.stickies}>
         <div
@@ -268,9 +268,7 @@ export default class Scroll extends Component<MyProps, MyState> {
           }
 
           <div>
-            {
-              stickiesReactElement
-            }
+            {stick}
           </div>
         </div>
       </ThemeContext.Provider>

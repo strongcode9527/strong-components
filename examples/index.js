@@ -12,7 +12,9 @@ class App extends Component {
   render() {
     return (
       <Scroll height={300}>
-        <Sticky>a</Sticky>
+        <Sticky>
+          <div>asdfasdf</div>
+        </Sticky>
         {
           new Array(100).fill(1).map((item, index) => (
             <div style={{textAlign: 'center'}}>
