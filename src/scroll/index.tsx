@@ -3,7 +3,7 @@ import classNames from 'classnames';
 import './index.less';
 import Sticky from './sticky';
 import ThemeContext from './context';
-import { Z_FIXED } from 'zlib';
+
 
 
 
