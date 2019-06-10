@@ -13,10 +13,20 @@ class App extends Component {
     return (
       <Scroll height={300}>
         <Sticky>
-          <div>asdfasdf</div>
+          <div>stick1</div>
         </Sticky>
         {
-          new Array(100).fill(1).map((item, index) => (
+          new Array(50).fill(1).map((item, index) => (
+            <div style={{textAlign: 'center'}}>
+              strong{index}
+            </div>
+          ))
+        }
+        <Sticky>
+          <div>stick2</div>
+        </Sticky>
+        {
+          new Array(50).fill(1).map((item, index) => (
             <div style={{textAlign: 'center'}}>
               strong{index}
             </div>

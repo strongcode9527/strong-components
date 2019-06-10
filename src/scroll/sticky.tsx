@@ -4,30 +4,16 @@
 import React, { Component, ReactNode, CSSProperties } from 'react';
 import ThemeContext from './context';
 
-interface MyProps {
-
-}
-
-interface MyState {
-
-}
-
 interface Style {
   bodyStyle: CSSProperties;
   moveStyle: CSSProperties;
 }
 
-export default class Sticky extends Component<MyProps, MyState> {
+export default class Sticky extends Component {
   ref: HTMLElement;
-  static defaultProps = {
-
-  }
 
   static contextType = ThemeContext
 
-  constructor(props: MyProps, context) {
-    super(props);
-  }
 
   componentDidMount(): void {
     this.context.stickies.push(this);

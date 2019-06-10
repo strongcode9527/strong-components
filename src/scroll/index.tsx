@@ -3,6 +3,7 @@ import classNames from 'classnames';
 import './index.less';
 import Sticky from './sticky';
 import ThemeContext from './context';
+import { Z_FIXED } from 'zlib';
 
 
 
@@ -61,7 +62,8 @@ export default class Scroll extends Component<MyProps, MyState> {
   startScrollTop: number;
   containerHeight: number;
   limitRollingHeight: number;
-  stickies: {stickies: [any]};
+  stickies: {stickies: [any] | []};
+  stickiesTop: number[];
 
   static defaultProps = {
     isRefresh: true,
@@ -92,7 +94,8 @@ export default class Scroll extends Component<MyProps, MyState> {
     this.limitRollingHeight = 0;
     this.stickies = {
       stickies: []
-    }
+    };
+    this.stickiesTop = [];
   }
 
   state: MyState = {
@@ -113,7 +116,10 @@ export default class Scroll extends Component<MyProps, MyState> {
     this.body.addEventListener('touchmove', this.handleTouchMove, false);
     this.body.addEventListener('touchstart', this.handleTouchStart, false);
     this.body.addEventListener('touchend', this.handleTouchEnd, false);
-
+    this.stickies.stickies.forEach((sticky): void => {
+      const { top }: {top: number} = sticky.ref.getBoundingClientRect();
+      this.stickiesTop.push(top);
+    });
   }
 
 
@@ -152,10 +158,10 @@ export default class Scroll extends Component<MyProps, MyState> {
     e.preventDefault();
 
     this.distance = e.touches[0].clientY - this.startY;
-
+    const currentY = preventY + this.distance;
     this.setState({
       isTransition: false,
-      currentY: preventY + this.distance,
+      currentY,
     });
 
   }
@@ -199,6 +205,25 @@ export default class Scroll extends Component<MyProps, MyState> {
     return await new Promise((resolve, reject): void => { onRefresh(resolve, reject); });
   }
 
+  getFixedStickies = (currentY): ReactNode => {
+    const stickiesInstance = this.stickies.stickies;
+    const stickiesElement = [];
+    this.stickiesTop.forEach((top, index): void => {
+      if(Math.abs(currentY) > top) {
+        stickiesElement.push(stickiesInstance[index].props.children);
+      }
+    });
+
+    return React.Children.map(stickiesElement, (child): ReactNode =>
+      React.cloneElement(child, {
+        style: {
+          position: 'fixed',
+          top: '0'
+        }
+      })
+    );
+  }
+
   render(): ReactNode {
     const {
       loading,
@@ -225,21 +250,16 @@ export default class Scroll extends Component<MyProps, MyState> {
     };
  
     const childrenLength = React.Children.count(children);
-    // const stickiesReactElement = React.Children.map(this.stickies.stickies, item => 
-    //   React.cloneElement(item, {style: {position: 'fixed', top: 0}})
-    // );
-    // console.log('asdfasdf', stickiesReactElement, this.stickies.stickies)
-    const stick = this.stickies.stickies[0] 
-    console.log(this.stickies.stickies)
+
     return (
       <ThemeContext.Provider value={this.stickies}>
         <div
           style={style.bodyStyle}
-          ref={(body): void => {this.body = body}}
+          ref={(body): void => {this.body = body;}}
           className={classNames(`${prefixCls}-body`, { [`${prefixCls}-refresh-loading`]: isLoading })}
         >
           {/* loading动画的 */}
-          <div ref={(animation): void => {this.animation = animation}} className={`${prefixCls}-ptr-element`} style={style.moveStyle}>
+          <div ref={(animation): void => {this.animation = animation;}} className={`${prefixCls}-ptr-element`} style={style.moveStyle}>
             <span className={`${prefixCls}-genericon ${prefixCls}-genericon-next`} />
             {
               loading && (
@@ -268,7 +288,7 @@ export default class Scroll extends Component<MyProps, MyState> {
           }
 
           <div>
-            {stick}
+            {this.getFixedStickies(currentY)}
           </div>
         </div>
       </ThemeContext.Provider>
