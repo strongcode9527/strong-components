@@ -108,11 +108,8 @@ export default class Scroll extends Component<MyProps, MyState> {
   }
 
   componentDidMount(): void {
-    this.containerHeight = this.body.clientHeight;
-
-    // 因为滚动高度是负值，所以颠倒相减的顺序
-    this.limitRollingHeight = this.containerHeight - this.items.clientHeight;
-
+    
+    this.setHeight();
     this.body.addEventListener('touchmove', this.handleTouchMove, false);
     this.body.addEventListener('touchstart', this.handleTouchStart, false);
     this.body.addEventListener('touchend', this.handleTouchEnd, false);
@@ -120,8 +117,16 @@ export default class Scroll extends Component<MyProps, MyState> {
       const { top }: {top: number} = sticky.ref.getBoundingClientRect();
       this.stickiesTop.push(top);
     });
+    window.addEventListener('resize', (): void => {
+      this.setHeight();
+    });
   }
 
+  setHeight = (): void => {
+    this.containerHeight = this.body.clientHeight;
+    // 因为滚动高度是负值，所以颠倒相减的顺序
+    this.limitRollingHeight = this.containerHeight - this.items.clientHeight;
+  }
 
   // eslint-disable-next-line @typescript-eslint/explicit-member-accessibility
   handleTouchStart = (e: TouchEvent): void  => {
@@ -209,7 +214,7 @@ export default class Scroll extends Component<MyProps, MyState> {
     const stickiesInstance = this.stickies.stickies;
     const stickiesElement = [];
     this.stickiesTop.forEach((top, index): void => {
-      if(Math.abs(currentY) > top) {
+      if(-currentY > top) {
         stickiesElement.push(stickiesInstance[index].props.children);
       }
     });
