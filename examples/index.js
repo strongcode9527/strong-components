@@ -1,14 +1,10 @@
-import React, { Component } from 'react'
-import { render } from 'react-dom'
-import { Scroll } from '../src'
+import React, { Component } from 'react';
+import { render } from 'react-dom';
+import { Scroll } from '../src';
 
-const Sticky = Scroll.Sticky
+const Sticky = Scroll.Sticky;
 
 class App extends Component {
-  constructor(props) {
-    super(props)
-  }
-
   render() {
     return (
       <Scroll height={300}>
@@ -17,7 +13,7 @@ class App extends Component {
         </Sticky>
         {
           new Array(50).fill(1).map((item, index) => (
-            <div style={{textAlign: 'center'}}>
+            <div style={{ textAlign: 'center' }} key={index}>
               strong{index}
             </div>
           ))
@@ -27,14 +23,14 @@ class App extends Component {
         </Sticky>
         {
           new Array(50).fill(1).map((item, index) => (
-            <div style={{textAlign: 'center'}}>
+            <div style={{ textAlign: 'center' }} key={index}>
               strong{index}
             </div>
           ))
         }
       </Scroll>
-    )
+    );
   }
 }
 
-render(<App />, document.getElementById('root'))
+render(<App />, document.getElementById('root'));

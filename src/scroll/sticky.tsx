@@ -10,23 +10,21 @@ interface Style {
 }
 
 export default class Sticky extends Component {
+  static contextType = ThemeContext;
+
   ref: HTMLElement;
-
-  static contextType = ThemeContext
-
 
   componentDidMount(): void {
     this.context.stickies.push(this);
   }
 
-  
   render(): ReactNode {
     const {
       children,
     } = this.props;
 
     return (
-      <div ref={(ref): void => { this.ref = ref; }}>
+      <div ref={(ref): void => { this.ref = ref }}>
         {children}
       </div>
     );
@@ -47,5 +45,3 @@ export default class Sticky extends Component {
 //   distanceToRefresh: PropTypes.number,
 //   scrollTargetSelector: PropTypes.string,
 // }
-
-

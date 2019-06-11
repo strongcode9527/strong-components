@@ -1,10 +1,39 @@
 {
   "parser": "@typescript-eslint/parser",
-  "extends": ["plugin:@typescript-eslint/recommended"],
-  "plugins": ["@typescript-eslint"],
+  "extends": ["eslint-config-alloy/react", "eslint-config-alloy/typescript"],
   "rules": {
-    "@typescript-eslint/indent": ["error", 2],
-    "@typescript-eslint/explicit-member-accessibility": "off",
-    "semi": ["error", "always"]
+      "indent": [
+            "error",
+            2,
+            {
+                "SwitchCase": 1,
+                "flatTernaryExpressions": true
+            }
+        ],
+        "@typescript-eslint/indent": [
+          "error",
+          2,
+          {
+              "SwitchCase": 1,
+              "flatTernaryExpressions": true
+          }
+        ],
+        "react/jsx-indent": [
+          "error",
+            2,
+            {
+                "SwitchCase": 1,
+                "flatTernaryExpressions": true
+            }
+        ],
+        "react/jsx-indent-props": [
+          "error",
+            2,
+            {
+                "SwitchCase": 1,
+                "flatTernaryExpressions": true
+            }
+        ],
+    "@typescript-eslint/explicit-member-accessibility": "off"
   }
 }

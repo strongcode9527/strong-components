@@ -6,7 +6,6 @@ import ThemeContext from './context';
 
 
 
-
 declare global {
   interface Window { REFRESH_DEFAULT_SCROLL_TOP: number }
 }
@@ -46,12 +45,31 @@ interface StickiesInterface {
   stickies: [any];
 }
 
-
-
-
-
-
 export default class Scroll extends Component<MyProps, MyState> {
+  static defaultProps = {
+    isRefresh: true,
+    resistance: 2.5,
+    defaultScrollTop: 0,
+    onRefresh: (): void => {},
+    isShowGotoTop: true,
+    distanceToRefresh: 100,
+    prefixCls: 'mi-refresh',
+    scrollTargetSelector: '',
+    operationCallback: (): void => {},
+    handleScrollToZero: (): void => {},
+  };
+
+  static Sticky = Sticky;
+
+  state: MyState = {
+    currentY: 0,
+    preventY: 0,
+    showTop: false,
+    moveDistance: 0,
+    isLoading: false,
+    isTransition: false,
+  };
+
   startY: number;
   distance: number;
   body: HTMLElement;
@@ -65,26 +83,11 @@ export default class Scroll extends Component<MyProps, MyState> {
   stickies: {stickies: [any] | []};
   stickiesTop: number[];
 
-  static defaultProps = {
-    isRefresh: true,
-    resistance: 2.5,
-    defaultScrollTop: 0,
-    onRefresh: (): void => {},
-    isShowGotoTop: true,
-    distanceToRefresh: 100,
-    prefixCls: 'mi-refresh',
-    scrollTargetSelector: '',
-    operationCallback: (): void => {},
-    handleScrollToZero: (): void => {},
-  }
-
-  static Sticky = Sticky;
-
   constructor(props: MyProps) {
     super(props);
 
     this.startY = 0;
-    this.body = null; //组建内部的body
+    this.body = null; // 组建内部的body
     this.distance = 0;
     this.items = null;
     this.animation = null;
@@ -98,17 +101,9 @@ export default class Scroll extends Component<MyProps, MyState> {
     this.stickiesTop = [];
   }
 
-  state: MyState = {
-    currentY: 0,
-    preventY: 0,
-    showTop: false,
-    moveDistance: 0,
-    isLoading: false,
-    isTransition: false,
-  }
 
   componentDidMount(): void {
-    
+
     this.setHeight();
     this.body.addEventListener('touchmove', this.handleTouchMove, false);
     this.body.addEventListener('touchstart', this.handleTouchStart, false);
@@ -126,16 +121,16 @@ export default class Scroll extends Component<MyProps, MyState> {
     this.containerHeight = this.body.clientHeight;
     // 因为滚动高度是负值，所以颠倒相减的顺序
     this.limitRollingHeight = this.containerHeight - this.items.clientHeight;
-  }
+  };
 
   // eslint-disable-next-line @typescript-eslint/explicit-member-accessibility
-  handleTouchStart = (e: TouchEvent): void  => {
+  handleTouchStart = (e: TouchEvent): void => {
     const { operationCallback } = this.props;
     this.startY = e.touches[0].clientY;
     this.startScrollTop = this.body.scrollTop;
 
     // 当触碰到整个组件的时候，调用回调函数
-    if(operationCallback && typeof operationCallback !== 'function') {
+    if (operationCallback && typeof operationCallback !== 'function') {
       throw new Error('handleScrollToZero must be a function');
     }
 
@@ -149,14 +144,14 @@ export default class Scroll extends Component<MyProps, MyState> {
     this.startTime = new Date().valueOf();
 
     operationCallback && operationCallback();
-  }
+  };
 
-  handleTouchMove = (e: TouchEvent): void => {
+  handleTouchMove = (e: TouchEvent): void | boolean => {
     const { isRefresh } = this.props;
     const { preventY } = this.state;
-  
-    if(!isRefresh) {
-      return void 0;
+
+    if (!isRefresh) {
+      return false;
     }
 
     e.stopPropagation();
@@ -164,29 +159,28 @@ export default class Scroll extends Component<MyProps, MyState> {
 
     this.distance = e.touches[0].clientY - this.startY;
     const currentY = preventY + this.distance;
+
     this.setState({
       isTransition: false,
       currentY,
     });
-
-  }
+  };
 
   handleTouchEnd = (): void => {
     const { currentY } = this.state;
     const isMovingUp = this.distance < 0;
     const isMoving = this.distance !== 0;
-    
     const touchOfDuration = new Date().valueOf() - this.startTime;
 
-    const inertiaDistance =  touchOfDuration < 200 && isMoving ? (isMovingUp ? -300 : 300)  : 0;
+    const inertiaDistance =  touchOfDuration < 200 && isMoving ? (isMovingUp ? -300 : 300) : 0;
 
     let positionY = currentY + inertiaDistance;
 
-    if(positionY > 0) {
+    if (positionY > 0) {
       positionY = 0;
     }
 
-    if(positionY < this.limitRollingHeight) {
+    if (positionY < this.limitRollingHeight) {
       positionY = this.limitRollingHeight;
     }
 
@@ -195,39 +189,38 @@ export default class Scroll extends Component<MyProps, MyState> {
       currentY: positionY,
       isTransition: true,
     });
-  }
+  };
 
 
-  loading = async (): Promise<void> => {
+  loading = async () => {
     const { onRefresh } = this.props;
-    
+
     this.distance = 0;
     this.isLoading = false;
     this.setState({
       moveDistance: 0,
       isLoading: false,
     });
-    return await new Promise((resolve, reject): void => { onRefresh(resolve, reject); });
-  }
 
-  getFixedStickies = (currentY): ReactNode => {
+    const promise = new Promise((resolve, reject): void => { onRefresh(resolve, reject, promise) });
+  };
+
+  getFixedStickies = (currentY: number): ReactNode => {
     const stickiesInstance = this.stickies.stickies;
     const stickiesElement = [];
     this.stickiesTop.forEach((top, index): void => {
-      if(-currentY > top) {
+      if (-currentY > top) {
         stickiesElement.push(stickiesInstance[index].props.children);
       }
     });
 
-    return React.Children.map(stickiesElement, (child): ReactNode =>
-      React.cloneElement(child, {
-        style: {
-          position: 'fixed',
-          top: '0'
-        }
-      })
-    );
-  }
+    return React.Children.map(stickiesElement, (child): ReactNode => React.cloneElement(child, {
+      style: {
+        position: 'fixed',
+        top: '0'
+      }
+    }));
+  };
 
   render(): ReactNode {
     const {
@@ -253,18 +246,18 @@ export default class Scroll extends Component<MyProps, MyState> {
         transitionTimingFunction: 'cubic-bezier(0.1, 0.57, 0.1, 1)'
       }
     };
- 
+
     const childrenLength = React.Children.count(children);
 
     return (
       <ThemeContext.Provider value={this.stickies}>
         <div
           style={style.bodyStyle}
-          ref={(body): void => {this.body = body;}}
+          ref={(body): void => { this.body = body }}
           className={classNames(`${prefixCls}-body`, { [`${prefixCls}-refresh-loading`]: isLoading })}
         >
           {/* loading动画的 */}
-          <div ref={(animation): void => {this.animation = animation;}} className={`${prefixCls}-ptr-element`} style={style.moveStyle}>
+          <div ref={(animation): void => { this.animation = animation }} className={`${prefixCls}-ptr-element`} style={style.moveStyle}>
             <span className={`${prefixCls}-genericon ${prefixCls}-genericon-next`} />
             {
               loading && (
@@ -284,7 +277,7 @@ export default class Scroll extends Component<MyProps, MyState> {
               : (
                 <div
                   style={style.moveStyle}
-                  ref={(items): void => {this.items = items;}}
+                  ref={(items: HTMLElement): void => { this.items = items }}
                   className={`${prefixCls}-refresh-view`}
                 >
                   {children}
@@ -314,5 +307,3 @@ export default class Scroll extends Component<MyProps, MyState> {
 //   distanceToRefresh: PropTypes.number,
 //   scrollTargetSelector: PropTypes.string,
 // }
-
-
