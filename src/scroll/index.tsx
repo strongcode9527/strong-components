@@ -198,11 +198,17 @@ export default class Scroll extends Component<MyProps, MyState> {
     this.distance = 0;
     this.isLoading = false;
     this.setState({
-      moveDistance: 0,
-      isLoading: false,
+      currentY: -100,
+      isLoading: true,
     });
 
-    const promise = new Promise((resolve, reject): void => { onRefresh(resolve, reject, promise) });
+    const promise = new Promise((resolve, reject): void => { onRefresh(resolve, reject, promise) }).then(() => {
+      this.setState({
+        isLoading: false,
+        currentY: 0
+      });
+      this.setHeight();
+    });
   };
 
   getFixedStickies = (currentY: number): ReactNode => {
