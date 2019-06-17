@@ -14,7 +14,9 @@ class App extends Component {
   };
   render() {
     return (
-      <Scroll height={300} onRefresh={this.handleRefreshCallback} hasLoading={true}>
+      <Scroll height={300} onRefresh={this.handleRefreshCallback} hasLoading={true} GotoTop={() => (<div>
+        strong
+      </div>)}>
         <Sticky>
           <div>stick1</div>
         </Sticky>

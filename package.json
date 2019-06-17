@@ -24,6 +24,7 @@
   "homepage": "https://github.com/strongcode9527/strong-components#readme",
   "dependencies": {
     "classnames": "^2.2.6",
+    "fastclick-pro": "^1.0.7",
     "prop-types": "^15.6.2",
     "ramda": "^0.25.0",
     "react": "^16.4.2",

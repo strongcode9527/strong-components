@@ -124,6 +124,13 @@ export default class Scroll extends Component<MyProps, MyState> {
     }
   }
 
+  handleGotoTop = () => {
+    this.setState({
+      currentY: 0,
+      isTransition: true
+    });
+  };
+
   setHeight = (): void => {
     this.containerHeight = this.body.clientHeight;
     // 因为滚动高度是负值，所以颠倒相减的顺序
@@ -145,8 +152,8 @@ export default class Scroll extends Component<MyProps, MyState> {
       isTransition: false,
     });
 
-    e.stopPropagation();
-    e.preventDefault();
+    // e.stopPropagation();
+    // e.preventDefault();
 
     this.startTime = new Date().valueOf();
 
@@ -248,6 +255,7 @@ export default class Scroll extends Component<MyProps, MyState> {
       hasLoading,
       children,
       prefixCls,
+      GotoTop
     } = this.props;
 
     const {
@@ -308,6 +316,11 @@ export default class Scroll extends Component<MyProps, MyState> {
 
           <div>
             {this.getFixedStickies(currentY)}
+          </div>
+          <div onClick={this.handleGotoTop} className="gotoTop">
+            {
+              <GotoTop />
+            }
           </div>
         </div>
       </ThemeContext.Provider>
