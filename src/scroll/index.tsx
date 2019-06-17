@@ -13,7 +13,7 @@ declare global {
 window.REFRESH_DEFAULT_SCROLL_TOP = window.REFRESH_DEFAULT_SCROLL_TOP || 0;
 
 interface MyProps {
-  loading: object;
+  hasLoading: boolean;
   prefixCls: string;
   GotoTop: Function;
   resistance: number;
@@ -117,6 +117,13 @@ export default class Scroll extends Component<MyProps, MyState> {
     });
   }
 
+  componentDidUpdate(PreProps: MyProps, preState: MyState): void{
+    const { isLoading } = this.state;
+    if (preState.isLoading === true && isLoading === false) {
+      this.setHeight();
+    }
+  }
+
   setHeight = (): void => {
     this.containerHeight = this.body.clientHeight;
     // 因为滚动高度是负值，所以颠倒相减的顺序
@@ -148,7 +155,11 @@ export default class Scroll extends Component<MyProps, MyState> {
 
   handleTouchMove = (e: TouchEvent): void | boolean => {
     const { isRefresh } = this.props;
-    const { preventY } = this.state;
+    const { preventY, isLoading } = this.state;
+
+    if (isLoading) {
+      return;
+    }
 
     if (!isRefresh) {
       return false;
@@ -171,10 +182,20 @@ export default class Scroll extends Component<MyProps, MyState> {
     const isMovingUp = this.distance < 0;
     const isMoving = this.distance !== 0;
     const touchOfDuration = new Date().valueOf() - this.startTime;
-
+    if (currentY > 100) {
+      this.setState({
+        isLoading: true,
+        currentY: 10,
+        isTransition: true,
+        preventY: 0
+      });
+      this.loading();
+      return;
+    }
     const inertiaDistance =  touchOfDuration < 200 && isMoving ? (isMovingUp ? -300 : 300) : 0;
 
     let positionY = currentY + inertiaDistance;
+
 
     if (positionY > 0) {
       positionY = 0;
@@ -197,17 +218,11 @@ export default class Scroll extends Component<MyProps, MyState> {
 
     this.distance = 0;
     this.isLoading = false;
-    this.setState({
-      currentY: -100,
-      isLoading: true,
-    });
-
     const promise = new Promise((resolve, reject): void => { onRefresh(resolve, reject, promise) }).then(() => {
       this.setState({
         isLoading: false,
         currentY: 0
       });
-      this.setHeight();
     });
   };
 
@@ -230,7 +245,7 @@ export default class Scroll extends Component<MyProps, MyState> {
 
   render(): ReactNode {
     const {
-      loading,
+      hasLoading,
       children,
       prefixCls,
     } = this.props;
@@ -266,7 +281,7 @@ export default class Scroll extends Component<MyProps, MyState> {
           <div ref={(animation): void => { this.animation = animation }} className={`${prefixCls}-ptr-element`} style={style.moveStyle}>
             <span className={`${prefixCls}-genericon ${prefixCls}-genericon-next`} />
             {
-              loading && (
+              hasLoading && (
                 <div className={`${prefixCls}-loading`}>
                   <span className={`${prefixCls}-loading-ptr-1`} />
                   <span className={`${prefixCls}-loading-ptr-2`} />

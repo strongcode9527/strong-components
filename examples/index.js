@@ -5,9 +5,16 @@ import { Scroll } from '../src';
 const Sticky = Scroll.Sticky;
 
 class App extends Component {
+  handleRefreshCallback = (resolve, reject, promise) => {
+    console.log('in refresh')
+    setTimeout(() => {
+      resolve('a');
+      console.log('after reslove')
+    }, 1000);
+  };
   render() {
     return (
-      <Scroll height={300}>
+      <Scroll height={300} onRefresh={this.handleRefreshCallback} hasLoading={true}>
         <Sticky>
           <div>stick1</div>
         </Sticky>
