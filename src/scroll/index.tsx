@@ -185,10 +185,13 @@ export default class Scroll extends Component<MyProps, MyState> {
   };
 
   handleTouchEnd = (): void => {
-    const { currentY } = this.state;
+    const { currentY, isLoading } = this.state;
     const isMovingUp = this.distance < 0;
     const isMoving = this.distance !== 0;
     const touchOfDuration = new Date().valueOf() - this.startTime;
+    if (isLoading) {
+      return;
+    }
     if (currentY > 100) {
       this.setState({
         isLoading: true,
@@ -242,12 +245,13 @@ export default class Scroll extends Component<MyProps, MyState> {
       }
     });
 
-    return React.Children.map(stickiesElement, (child): ReactNode => React.cloneElement(child, {
-      style: {
-        position: 'fixed',
-        top: '0'
-      }
-    }));
+    return React.Children.map(stickiesElement, (child): ReactNode => (
+      <div style={{ position: 'absolute', top: '0', left: '0' }}>
+        {
+          child
+        }
+      </div>
+    ));
   };
 
   render(): ReactNode {

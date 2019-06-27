@@ -4,6 +4,13 @@ import { Scroll } from '../src';
 
 const Sticky = Scroll.Sticky;
 
+
+function Fixed() {
+  return (
+    <div>strong</div>
+  );
+}
+
 class App extends Component {
   handleRefreshCallback = (resolve, reject, promise) => {
     console.log('in refresh')
@@ -18,7 +25,7 @@ class App extends Component {
         strong
       </div>)}>
         <Sticky>
-          <div>stick1</div>
+          <Fixed />
         </Sticky>
         {
           new Array(50).fill(1).map((item, index) => (
